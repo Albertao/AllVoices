@@ -15,6 +15,10 @@ react-native + react-redux，目前仅支持android客户端
 ![歌单详情页面](http://og2bqlbn5.bkt.clouddn.com/shot3.png)
 ![歌单管理界面](http://og2bqlbn5.bkt.clouddn.com/shot4.png)
 
+# 安装
+
+请[在此](https://github.com/Albertao/AllVoices/releases/tag/v0.1.0)下载Android apk
+
 # 运行开发
 
 确定你已安装了安卓sdk，可以参考[这里](http://reactnative.cn/docs/0.48/getting-started.html)，之后确保你已经安装了android ndk（主要是为了满足热更新库的要求），并设置ANDROID_NDK_HOME环境变量指向你ndk的安装地址，如`C:\android\sdk\ndk\android-ndk-r15c`
