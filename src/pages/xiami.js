@@ -57,8 +57,8 @@ class XiamiIndex extends React.Component {
           navIconName="menu"
           iconSize={30}
           onIconClicked ={() => navigate('DrawerOpen')}
-          style={{elevation: 2, height: 60, backgroundColor: '#fa8723'}}
-          title={'我的歌单'}
+          style={{elevation: 2, height: 56, backgroundColor: '#fa8723'}}
+          title={'虾米'}
           actions={
             [
               {iconSize: 30, iconName: 'search', title: '搜索', show: 'always'}
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     marginBottom: 2
   },
   bottom: {
-    height: height-120-StatusBar.currentHeight,
+    height: height-116-StatusBar.currentHeight,
     backgroundColor: '#eee'
   },
   top: {

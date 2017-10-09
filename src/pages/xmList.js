@@ -1,10 +1,10 @@
 import React, {Component} from 'react'
-import {ActivityIndicator, BackHandler, FlatList, ToastAndroid, NativeModules, StyleSheet, Text, View, StatusBar, Image, TouchableNativeFeedback, ScrollView} from 'react-native'
+import {ActivityIndicator, BackHandler, FlatList, ToastAndroid, NativeModules, StyleSheet, Text, TextInput, View, StatusBar, Image, TouchableNativeFeedback, ScrollView} from 'react-native'
 import getXiamiListDetail from '../actions/xmList'
 import {connect} from 'react-redux'
 import {NavigationActions} from 'react-navigation'
 import {List, ListItem} from 'react-native-elements'
-import { Icon, Tile } from 'react-native-elements'
+import { Icon, Tile, Button } from 'react-native-elements'
 import Modal from 'react-native-modalbox'
 import xmEnc from '../utils/xmEnc'
 import Player from '../components/player'
@@ -21,6 +21,7 @@ class XiamiList extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {
+			newListName: this.props.navigation.state.params.name,
 			storageSongLists: [],
 			selectedSongId: {}
 		}
@@ -200,12 +201,53 @@ class XiamiList extends Component {
 				<Tile
 				   imageSrc={{uri: params.curl}}
 				   title={params.name}
-				   icon={{name: 'play-circle-outline'}}
+				   onPress={this.showModal}
 				   featured
 				   caption={"Author: " + params.creator}
 				/>
 			</View>
 		)
+	}
+
+	showModal = () => {
+		this.refs.collectModal.open()
+	}
+
+	collectSongList = () => {
+		if(this.state.newListName != '') {
+			var songs = []
+			this.props.song_list.songs.map((item, index) => {
+				var obj = {
+					song_url: item.listen_file,
+					song_name: item.song_name,
+					album_pic: item.album_logo,
+					artist_name: item.singers,
+					source: stypes.XIAMI
+				}
+				songs.push(obj)
+			})
+			storage.getIdsForKey('songList').then((ids) => {
+				if(ids.length == 0) {
+					var index = 2
+				} else {
+					var index = ids[ids.length-1] + 1
+				}
+				storage.save({
+					key: 'songList',
+					id: index,
+					data: {
+						songs: songs,
+						name: this.state.newListName,
+						index: 0,
+						type: stypes.SONG_LIST_LOOP
+					}
+				}).then((ret) => {
+					this.refs.collectModal.close()
+				})
+			})
+		}else {
+			ToastAndroid.show('您尚未输入歌单名称', ToastAndroid.SHORT)
+		}
 	}
 
 	render() {
@@ -225,7 +267,41 @@ class XiamiList extends Component {
 		      	  songNameColor="rgba(0, 0, 0, 0.87)"
 		      	  artistColor="rgba(0, 0, 0, 0.54)" />
 		      	{this.renderModal()}  
+		      	{this.renderCollectModal()}
 		    </View>
+		)
+	}
+
+	renderCollectModal() {
+		return(
+			<Modal
+			  coverScreen={true}
+			  style={{height: 300, justifyContent: 'center', alignItems: 'center'}}
+			  position={"center"}
+			  backButtonClose={true}
+			  swipeArea={300}
+			  ref={"collectModal"}>
+			  	<Text>歌单收藏名称：</Text>
+			  	<TextInput
+		      		placeholder="请输入歌单名称"
+		      		style={{width: 200}}
+        			onChangeText={(text) => this.setState({newListName: text})}
+        			value={this.state.newListName}
+      			/>
+				<View style={{flexDirection: 'row', marginTop: 20}}>
+				<Button
+				  raised
+				  onPress={this.collectSongList}
+				  icon={{name: 'done'}}
+				  backgroundColor='#2096f3'
+				  title='确定' />
+				<Button
+				  raised
+				  onPress={() => this.refs.collectModal.close()}
+				  icon={{name: 'close'}}
+				  title='取消' />
+				</View>
+			</Modal>
 		)
 	}
 

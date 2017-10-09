@@ -273,7 +273,7 @@ class SongDetail extends Component {
 
 	renderSongList = ({item, index}) => {
 		return (
-			<TouchableNativeFeedback onPress={() => this.playSong(item, index)}>
+			<TouchableNativeFeedback key={index} onPress={() => this.playSong(item, index)}>
 			<ListItem
 				containerStyle={{
 					backgroundColor: 'rgba(0,0,0,0.3)',
@@ -328,17 +328,16 @@ class SongDetail extends Component {
 			  backButtonClose={true}
 			  swipeToClose={false}
 			  swipeArea={(height-60)/2}>
-		      <ScrollView style={{flex: 1, height: 300}}>
-		      	{this.state.song_list.length == 0 ?
-		      		(<Text>尚未有任何歌曲</Text>) : 
-		      		(<FlatList
-		      		ref={"sl"}
-		      		initialNumToRender={9}
-		      		keyExtractor={this._key_extractor}
-		      		data={this.state.song_list}
-		      		renderItem={this.renderSongList} />)
-		      	}
-		      </ScrollView>
+		      {this.state.song_list.length == 0 ?
+		      	(<Text>尚未有任何歌曲</Text>) : 
+		      	(<FlatList
+		      	style={{flex: 1, height: 300}}
+		     	ref={"sl"}
+		      	initialNumToRender={9}
+		      	keyExtractor={this._key_extractor}
+		      	data={this.state.song_list}
+		      	renderItem={this.renderSongList} />)
+		      }
 		    </Modal>
 		)
 	}

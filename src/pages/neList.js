@@ -1,11 +1,11 @@
 import React, {Component} from 'react'
-import {ActivityIndicator, BackHandler, FlatList, ToastAndroid, StyleSheet, Text, View, StatusBar, Image, TouchableNativeFeedback, ScrollView} from 'react-native'
+import {ActivityIndicator, BackHandler, FlatList, ToastAndroid, StyleSheet, Text, TextInput, View, StatusBar, Image, TouchableNativeFeedback, ScrollView} from 'react-native'
 import getNeteaseListDetail from '../actions/neList'
 import getNeteaseSongDetail from '../actions/neDetail'
 import {connect} from 'react-redux'
 import {NavigationActions} from 'react-navigation'
 import {List, ListItem} from 'react-native-elements'
-import { Icon, Tile } from 'react-native-elements'
+import { Icon, Tile, Button } from 'react-native-elements'
 import neEnc from '../utils/neEnc'
 import Player from '../components/player'
 import * as stypes from '../utils/storage/StorageTypes'
@@ -25,7 +25,8 @@ class NetEaseList extends Component {
 		super(props)
 		this.state = {
 			storageSongLists: [],
-			selectedSongId: {}
+			selectedSongId: {},
+			newListName: this.props.navigation.state.params.name
 		}
 	}
 
@@ -93,7 +94,6 @@ class NetEaseList extends Component {
 				song_name: l.name,
 				artist_name: this.artistName(l.artists),
 				album_pic: l.album.blurPicUrl,
-				playing: false
 			}
 			songs.push(obj)
 		})
@@ -210,12 +210,16 @@ class NetEaseList extends Component {
 				<Tile
 				   imageSrc={{uri: params.curl}}
 				   title={params.name}
-				   icon={{name: 'play-circle-outline'}}
+				   onPress={this.showCollectModal}
 				   featured
 				   caption={"Author: " + params.creator}
 				/>
 			</View>
 		)
+	}
+
+	showCollectModal = () => {
+		this.refs.collectModal.open()
 	}
 
 	renderModal() {
@@ -262,11 +266,82 @@ class NetEaseList extends Component {
 		)
 	}
 
+	renderCollectModal() {
+		return(
+			<Modal
+			  coverScreen={true}
+			  style={{height: 300, justifyContent: 'center', alignItems: 'center'}}
+			  position={"center"}
+			  backButtonClose={true}
+			  swipeArea={300}
+			  ref={"collectModal"}>
+			  	<Text>歌单收藏名称：</Text>
+			  	<TextInput
+		      		placeholder="请输入歌单名称"
+		      		style={{width: 200}}
+        			onChangeText={(text) => this.setState({newListName: text})}
+        			value={this.state.newListName}
+      			/>
+				<View style={{flexDirection: 'row', marginTop: 20}}>
+				<Button
+				  raised
+				  onPress={this.collectSongList}
+				  icon={{name: 'done'}}
+				  backgroundColor='#2096f3'
+				  title='确定' />
+				<Button
+				  raised
+				  onPress={() => this.refs.collectModal.close()}
+				  icon={{name: 'close'}}
+				  title='取消' />
+				</View>
+			</Modal>
+		)
+	}
+
+	collectSongList = () => {
+		if(this.state.newListName != '') {
+			var songs = []
+			this.props.song_list.tracks.map((l, index) => {
+				var obj = {
+					song_id: l.id,
+					source: stypes.NETEASE,
+					song_name: l.name,
+					artist_name: this.artistName(l.artists),
+					album_pic: l.album.blurPicUrl,
+				}
+				songs.push(obj)
+			})
+			storage.getIdsForKey('songList').then((ids) => {
+				if(ids.length == 0) {
+					var index = 2
+				} else {
+					var index = ids[ids.length-1] + 1
+				}
+				storage.save({
+					key: 'songList',
+					id: index,
+					data: {
+						songs: songs,
+						name: this.state.newListName,
+						index: 0,
+						type: stypes.SONG_LIST_LOOP
+					}
+				}).then((ret) => {
+					this.refs.collectModal.close()
+				})
+			})
+		}else {
+			ToastAndroid.show('您尚未输入歌单名称', ToastAndroid.SHORT)
+		}
+	}
+
 	render() {
 		return (
 			<View style={styles.layout}>
 		      	<StatusBar backgroundColor='rgba(0, 0, 0, 0.3)' translucent={true} />
 		      	{this.renderModal()}  
+		      	{this.renderCollectModal()}
 		      	<View style={styles.card}>
 					{this.renderCard()}
 		      	</View>

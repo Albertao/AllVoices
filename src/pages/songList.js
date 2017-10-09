@@ -15,6 +15,8 @@ export default class SongList extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {
+			deleteId: 0,
+			isSetting: false,
 			songLists: [],
 			text: '',
 			isOpen: false,
@@ -79,6 +81,27 @@ export default class SongList extends Component {
 		}
 	}
 
+	renderDeleteButton(index) {
+		return (
+			<TouchableNativeFeedback 
+				background={TouchableNativeFeedback.SelectableBackground()}
+				onPress={() => {
+					storage.getIdsForKey('songList').then((ids) => {
+						if(ids[index] == 1) {
+							ToastAndroid.show('无法删除默认的播放列表~', ToastAndroid.SHORT)
+						}else {
+							this.setState({deleteId: ids[index]})
+					    	this.refs.deleteModal.open()
+						} 
+	      			})
+				}}>
+				<View style={{justifyContent: 'center', alignItems: 'center', backgroundColor: 'red', height: 20, top: 9, left: 15, padding: 10, borderRadius: 10}}>
+					<Text style={{fontSize: 11, color: '#fff'}}>删除</Text>
+				</View>
+			</TouchableNativeFeedback>
+		)
+	}
+
 	renderLists() {
 		if(this.state.songLists.length == 0) {
 			return (
@@ -87,29 +110,103 @@ export default class SongList extends Component {
 				</View>
 			)
 		}else {
-			return (
-				<List containerStyle={{marginTop: 0, marginBottom: 20}}>
-				  {
-				    this.state.songLists.map((l, i) => (
-				      <ListItem
-				      	onPress={() => {
-				      		storage.getIdsForKey('songList').then((ids) => {
-				      			this.props.navigation.navigate('ListDetail', {
-				      				sid: ids[i]
-				      			})
-				      		})
-				      	}}
-				      	roundAvatar
-				        avatar={l.songs.length == 0 ? require('../static/cd.png') : {uri: l.songs[0].album_pic}}
-				        key={i}
-				        title={l.name}
-				        subtitle={l.songs.length + '首'}
-				      />
-				    ))
-				  }
-				</List>
-			)
+			if(this.state.isSetting) {
+				return (
+					<List containerStyle={{marginTop: 0, marginBottom: 20}}>
+					  {
+					    this.state.songLists.map((l, i) => (
+					      <ListItem
+					      	onPress={() => {
+					      		storage.getIdsForKey('songList').then((ids) => {
+					      			this.props.navigation.navigate('ListDetail', {
+					      				sid: ids[i]
+					      			})
+					      		})
+					      	}}	
+					      	badge={{element: this.renderDeleteButton(i)}}
+					      	roundAvatar
+					        avatar={l.songs.length == 0 ? require('../static/cd.png') : {uri: l.songs[0].album_pic}}
+					        key={i}
+					        title={l.name}
+					        subtitle={l.songs.length + '首'}
+					      />
+					    ))
+					  }
+					</List>
+				)
+			}else {
+				return (
+					<List containerStyle={{marginTop: 0, marginBottom: 20}}>
+					  {
+					    this.state.songLists.map((l, i) => (
+					      <ListItem
+					      	onPress={() => {
+					      		storage.getIdsForKey('songList').then((ids) => {
+					      			this.props.navigation.navigate('ListDetail', {
+					      				sid: ids[i]
+					      			})
+					      		})
+					      	}}		
+					      	roundAvatar
+					        avatar={l.songs.length == 0 ? require('../static/cd.png') : {uri: l.songs[0].album_pic}}
+					        key={i}
+					        title={l.name}
+					        subtitle={l.songs.length + '首'}
+					      />
+					    ))
+					  }
+					</List>
+				)
+			}
 		}
+	}
+
+	renderDeleteModal() {
+		return (
+			<Modal style={styles.modal} position={"center"} ref={"deleteModal"}>
+		      	<Text>您确定要删除该歌单吗？</Text>
+				<View style={{flexDirection: 'row', marginTop: 20}}>
+				<Button
+				  raised
+				  onPress={() => {
+				  	if(this.state.deleteId != 0) {
+				  		storage.load({
+							key: 'activeSongList',
+							id: 1
+						}).then((ret) => {
+							if(ret.activeId == this.state.deleteId) {
+								storage.save({
+									key: 'activeSongList',
+									id: 1,
+									data: {
+										activeId: 1,
+										activeIndex: 0
+									}
+								})
+							}
+							storage.remove({
+								key: 'songList',
+								id: this.state.deleteId
+							}).then((ret) => {
+								this.refs.deleteModal.close()
+								this.refreshSongLists()
+							})	
+						})
+				  	}else {
+				  		ToastAndroid.show('错误的歌单id，请重试~', ToastAndroid.SHORT)
+				  	}
+				  }}
+				  icon={{name: 'done'}}
+				  backgroundColor='#2096f3'
+				  title='确定' />
+				<Button
+				  raised
+				  onPress={() => this.refs.deleteModal.close()}
+				  icon={{name: 'close'}}
+				  title='取消' />
+				</View>
+		    </Modal>
+		)
 	}
 
 	renderModal() {
@@ -147,18 +244,25 @@ export default class SongList extends Component {
 				  navIconName="menu"
 				  iconSize={30}
 				  onIconClicked ={() => this.props.navigation.navigate('DrawerOpen')}
-				  style={{elevation: 2, height: 60, backgroundColor: '#03a9f4'}}
+				  style={{elevation: 2, height: 56, backgroundColor: '#03a9f4'}}
 				  title={'我的歌单'}
 				  titleColor="#fff"
 				/>
 				<ScrollView style={{height:height-116-StatusBar.currentHeight}}>
 					<View style={styles.SectionTitle}>
 						<Text>我创建的歌单</Text>
+						<View style={{flexDirection: 'row'}}>
 						<TouchableNativeFeedback
 						  onPress={() => this.refs.modal.open()}
 						  >
-							<Icon style={styles.AddCircle} name="add-circle" />
+							<Icon style={[styles.icon, styles.AddCircle]} name="add-circle" />
 						</TouchableNativeFeedback>
+						<TouchableNativeFeedback
+						  onPress={() => this.setState({isSetting: !this.state.isSetting})}
+						  >
+							<Icon style={styles.icon} name="settings" />
+						</TouchableNativeFeedback>
+						</View>
 					</View>
 					{this.renderLists()}
 				</ScrollView>
@@ -168,6 +272,7 @@ export default class SongList extends Component {
 		      	  btnColor="#000"
 		      	  songNameColor="rgba(0, 0, 0, 0.87)"
 		      	  artistColor="rgba(0, 0, 0, 0.54)" />
+		      	{this.renderDeleteModal()}
 		      	{this.renderModal()}
 			</View>
 		)
@@ -190,6 +295,9 @@ const styles = StyleSheet.create({
 		height: 30
 	},
 	AddCircle: {
+		marginRight: 10,
+	},
+	icon: {
 		justifyContent: 'flex-end',
 		fontSize: 18
 	},

@@ -56,8 +56,8 @@ class NetEaseIndex extends React.Component {
 				navIconName="menu"
 				iconSize={30}
 				onIconClicked ={() => navigate('DrawerOpen')}
-				style={{elevation: 2, height: 60, backgroundColor: '#c20c0c'}}
-				title={'我的歌单'}
+				style={{elevation: 2, height: 56, backgroundColor: '#c20c0c'}}
+				title={'网易云'}
 				actions={
 					[
 						{iconSize: 30, iconName: 'search', title: '搜索', show: 'always'}
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
 		marginBottom: 2
 	},
 	bottom: {
-		height: height-120-StatusBar.currentHeight,
+		height: height-116-StatusBar.currentHeight,
 		backgroundColor: '#eee'
 	},
 	top: {
