@@ -21,8 +21,6 @@ export default class SongList extends Component {
 			text: '',
 			isOpen: false,
       		isDisabled: false,
-      		swipeToClose: true,
-      		sliderValue: 0.3
 		}
 	}
 
