@@ -82,7 +82,7 @@ class Player extends React.Component {
 			<TouchableNativeFeedback onPress={() => {
 				this.props.navigation.navigate('SongDetail')
 			}}>
-			<View style={{flexDirection: 'row', height: 60, elevation: 10, backgroundColor: this.props.bgColor}}>
+			<View style={{flexDirection: 'row', height: 60, elevation: 10, backgroundColor: this.props.bgColor,}}>
 				<View style={{flex: 2, justifyContent: 'center', alignItems: 'center'}}>
 					<Avatar
 					  width={40}

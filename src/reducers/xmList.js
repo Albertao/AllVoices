@@ -1,4 +1,5 @@
 import * as types from '../actions/ActionTypes'
+import * as stypes from '../utils/storage/StorageTypes'
 
 const initialState = {
 	status: 'doing', //init, doing, done, fail
@@ -14,9 +15,21 @@ export default function getXiamiListDetail(state=initialState, action) {
 			return state;
 			break
 		case types.XIAMI_SONG_LIST_DETAIL_DONE:
+			var songs = []
+			action.data.songs.map((item, index) => {
+				var obj = {
+					song_id: item.song_id,
+					song_url: item.listen_file,
+					song_name: item.song_name,
+					album_pic: item.album_logo,
+					artist_name: item.singers,
+					source: stypes.XIAMI
+				}
+				songs.push(obj)
+			})
 			return {
 				...state,
-				song_list: action.data,
+				song_list: songs,
 				success: true,
 				status: 'done'
 			}

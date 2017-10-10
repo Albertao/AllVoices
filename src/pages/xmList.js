@@ -83,35 +83,23 @@ class XiamiList extends Component {
 	}
 
 	playSong = (item, index) => {
-		var currentSongInfo = {
-			song_url: item.listen_file,
-			song_name: item.song_name,
-			album_pic: item.album_logo,
-			artist_name: item.singers
-		}
-		var songs = []
-		this.props.song_list.songs.map((item, index) => {
-			var obj = {
-				song_url: item.listen_file,
-				song_name: item.song_name,
-				album_pic: item.album_logo,
-				artist_name: item.singers,
-				source: stypes.XIAMI
-			}
-			songs.push(obj)
-		})
 		var currentSongList = {
 			name: '播放列表',
 			index: index,
 			type: stypes.SONG_LIST_LOOP,
-			songs: songs
+			songs: this.props.song_list
 		}
+		storage.save({
+			key: 'activeSongList',
+			id: 1,
+			data: {activeId: 1, activeIndex: index}
+		})
 		storage.save({
 			key: 'songList',
 			id: 1,
 			data: currentSongList
 		})
-		NativeModules.MusicService.play(currentSongInfo)
+		NativeModules.MusicService.play(item)
 		this.props.dispatch({'type': types.SET_XM_PLAYER_DETAIL, data: item})
 	}
 
@@ -121,7 +109,7 @@ class XiamiList extends Component {
 			<FlatList
 			  ListFooterComponent={this.renderFooter}
 			  keyExtractor={this._key_extractor}
-			  data={this.props.song_list.songs}
+			  data={this.props.song_list}
 			  renderItem={this.renderListSongs}>
 			</FlatList>
 			</View>
@@ -142,21 +130,14 @@ class XiamiList extends Component {
 			<TouchableNativeFeedback onPress={() => this.playSong(item, index)}>
 			  <ListItem
 			    roundAvatar
-			    avatar={{uri:item.album_logo}}
+			    avatar={{uri:item.album_pic}}
 			    rightIcon={{name: 'add'}}
 			    onPressRightIcon={() => {
-				    var obj = {
-						song_url: item.listen_file,
-						song_name: item.song_name,
-						album_pic: item.album_logo,
-						artist_name: item.singers,
-						source: stypes.XIAMI
-					}
-					this.setState({selectedSong: obj})
+					this.setState({selectedSong: item})
 					this.refs.modal.open()
 			    }}
 			    title={item.song_name}
-			    subtitle={item.singers}
+			    subtitle={item.artist_name}
 			  />
 			</TouchableNativeFeedback>  
 		)
@@ -215,17 +196,6 @@ class XiamiList extends Component {
 
 	collectSongList = () => {
 		if(this.state.newListName != '') {
-			var songs = []
-			this.props.song_list.songs.map((item, index) => {
-				var obj = {
-					song_url: item.listen_file,
-					song_name: item.song_name,
-					album_pic: item.album_logo,
-					artist_name: item.singers,
-					source: stypes.XIAMI
-				}
-				songs.push(obj)
-			})
 			storage.getIdsForKey('songList').then((ids) => {
 				if(ids.length == 0) {
 					var index = 2
@@ -236,7 +206,7 @@ class XiamiList extends Component {
 					key: 'songList',
 					id: index,
 					data: {
-						songs: songs,
+						songs: this.props.song_list,
 						name: this.state.newListName,
 						index: 0,
 						type: stypes.SONG_LIST_LOOP

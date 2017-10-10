@@ -1,9 +1,18 @@
 import * as types from '../actions/ActionTypes'
+import * as stypes from '../utils/storage/StorageTypes'
 
 const initialState = {
 	status: 'doing', //init, doing, done, fail
 	song_list: [],
 	success: false
+}
+
+function artistName(artists) {
+	var arName = ''
+	artists.map((ar, i) => {
+		arName += ar.name + (i+1 === artists.length ? '' : '/')
+	})
+	return arName
 }
 
 export default function getNeteaseListDetail(state=initialState, action) {
@@ -14,9 +23,20 @@ export default function getNeteaseListDetail(state=initialState, action) {
 			return state;
 			break
 		case types.NETEASE_SONG_LIST_DETAIL_DONE:
+			var songs = []
+			action.data.tracks.map((l, i) => {
+				var obj = {
+					song_id: l.id,
+					source: stypes.NETEASE,
+					song_name: l.name,
+					artist_name: artistName(l.artists),
+					album_pic: l.album.blurPicUrl,
+				}
+				songs.push(obj)
+			})
 			return {
 				...state,
-				song_list: action.data,
+				song_list: songs,
 				success: true,
 				status: 'done'
 			}

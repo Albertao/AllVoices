@@ -12,14 +12,10 @@ export default function getPlayerDetail(state=initialState, action) {
 	switch(action.type) {
 		case types.SET_NE_PLAYER_DETAIL:
 			if(!action.storage) {
-				var aN = ''
-				action.data.artists.map((item, index) => {
-					aN += (item.name + (index+1 == action.data.artists.length ? '' : '/'))
-				})
 				return {
-					songName: action.data.name,
-					artiseName: aN,
-					albumPic: action.data.album.blurPicUrl,
+					songName: action.data.song_name,
+					artiseName: action.data.artist_name,
+					albumPic: action.data.album_pic,
 					playing: true,
 					status: 'done'
 				}
@@ -46,7 +42,7 @@ export default function getPlayerDetail(state=initialState, action) {
 				return {
 					songName: action.data.song_name,
 					albumPic:action.data.album_logo,
-					artiseName:action.data.singers,
+					artiseName:action.data.artist_name,
 					playing: true,
 					status: 'done'
 				}

@@ -60,7 +60,7 @@ class NetEaseList extends Component {
 	}
 
 	_key_extractor = (item) => {
-		return item.id
+		return item.song_id
 	}
 
 	renderTracks() {
@@ -86,30 +86,24 @@ class NetEaseList extends Component {
 	}
 
 	getSongUrl = (item, index) => {
-		var songs = []
-		this.props.song_list.tracks.map((l, i) => {
-			var obj = {
-				song_id: l.id,
-				source: stypes.NETEASE,
-				song_name: l.name,
-				artist_name: this.artistName(l.artists),
-				album_pic: l.album.blurPicUrl,
-			}
-			songs.push(obj)
-		})
 		var currentSongList = {
 			name: '播放列表',
 			index: index,
 			type: stypes.SONG_LIST_LOOP,
-			songs: songs
+			songs: this.props.song_list
 		}
+		storage.save({
+			key: 'activeSongList',
+			id: 1,
+			data: {activeId: 1, activeIndex: index}
+		})
 		storage.save({
 			key: 'songList',
 			id: 1,
 			data: currentSongList
 		})
-		var obj = {ids: [item.id], br: 12800, csrf_token: ''}
-		item.info = this.artistName(item.artists)
+		var obj = {ids: [item.song_id], br: 12800, csrf_token: ''}
+		item.info = item.artist_name
 		this.props.dispatch(getNeteaseSongDetail(neEnc(obj), item))
 	}
 
@@ -119,7 +113,7 @@ class NetEaseList extends Component {
 			<FlatList
 			  ListFooterComponent={this.renderFooter}
 			  keyExtractor={this._key_extractor}
-			  data={this.props.song_list.tracks}
+			  data={this.props.song_list}
 			  renderItem={this.renderListSongs}>
 			</FlatList>
 			</View>
@@ -140,21 +134,15 @@ class NetEaseList extends Component {
 		<TouchableNativeFeedback onPress={() => this.getSongUrl(item, index)}>
 			<ListItem
 			    roundAvatar
-			    avatar={{uri:item.album.blurPicUrl}}
-			    title={item.name}
+			    avatar={{uri:item.album_pic}}
+			    title={item.song_name}
 			    rightIcon={{name: 'add'}}
 			    onPressRightIcon={() => {
-		    	var obj = {
-					song_id: item.id,
-					source: stypes.NETEASE,
-					song_name: item.name,
-					artist_name: this.artistName(item.artists),
-					album_pic: item.album.blurPicUrl
-				}
-			    this.setState({selectedSong: obj})
-			    this.refs.modal.open()
+			    	item.souce = stypes.NETEASE
+				    this.setState({selectedSong: item})
+				    this.refs.modal.open()
 				}}
-			    subtitle={this.artistName(item.artists)}
+			    subtitle={item.artist_name}
 			/>
 		</TouchableNativeFeedback>  
 		)
@@ -301,17 +289,6 @@ class NetEaseList extends Component {
 
 	collectSongList = () => {
 		if(this.state.newListName != '') {
-			var songs = []
-			this.props.song_list.tracks.map((l, index) => {
-				var obj = {
-					song_id: l.id,
-					source: stypes.NETEASE,
-					song_name: l.name,
-					artist_name: this.artistName(l.artists),
-					album_pic: l.album.blurPicUrl,
-				}
-				songs.push(obj)
-			})
 			storage.getIdsForKey('songList').then((ids) => {
 				if(ids.length == 0) {
 					var index = 2
@@ -322,7 +299,7 @@ class NetEaseList extends Component {
 					key: 'songList',
 					id: index,
 					data: {
-						songs: songs,
+						songs: this.props.song_list,
 						name: this.state.newListName,
 						index: 0,
 						type: stypes.SONG_LIST_LOOP

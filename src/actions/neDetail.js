@@ -15,9 +15,7 @@ export default function getNeteaseSongDetail(obj, item) {
 			let json = JSON.parse(res._bodyText)
 			var obj = {
 				song_url: json.data[0].url,
-				song_name: item.name,
-				artist_name: item.info,
-				album_pic: item.album.blurPicUrl
+				...item
 			}
 			NativeModules.MusicService.play(obj)
 			if(json.code == 200) {
