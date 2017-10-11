@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {BackHandler, ScrollView, FlatList, DeviceEventEmitter, NativeModules, ProgressBar, TouchableNativeFeedback, StyleSheet, ToastAndroid, StatusBar, ImageBackground, Image, View, Text} from 'react-native'
+import {Easing, Animated, BackHandler, ScrollView, FlatList, DeviceEventEmitter, NativeModules, ProgressBar, TouchableNativeFeedback, StyleSheet, ToastAndroid, StatusBar, ImageBackground, Image, View, Text} from 'react-native'
 import {connect} from 'react-redux'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import {ListItem, Button, Slider} from 'react-native-elements'
@@ -23,7 +23,9 @@ class SongDetail extends Component {
 
 	constructor(props) {
 		super(props)
+		animation: null,
 		this.state = {
+			rotationDeg: new Animated.Value(0),
 			value: 0,
 			current: '0:00',
 			duration: '--:--',
@@ -34,6 +36,14 @@ class SongDetail extends Component {
 	}
 
 	componentDidMount() {
+		this.animation = Animated.loop(Animated.timing(this.state.rotationDeg, {
+			toValue: 360,
+			duration: 20000,
+			easing: Easing.linear
+		}))
+		if(this.props.playing) {
+			this.animation.start()
+		}
         BackHandler.addEventListener('hardwareBackPress', this.onBackPress)
     }
 
@@ -116,9 +126,16 @@ class SongDetail extends Component {
 
 	playOrPause = () => {
 		if(this.props.playing) {
+			this.animation.stop()
 			NativeModules.MusicService.pause()
 			this.props.dispatch({'type':types.SET_PLAYER_PAUSE})
 		}else {
+			this.animation = Animated.loop(Animated.timing(this.state.rotationDeg, {
+				toValue: 360,
+				duration: 20000,
+				easing: Easing.linear
+			}))
+			this.animation.start()
 			NativeModules.MusicService.resume()
 			this.props.dispatch({'type':types.SET_PLAYER_RESUME})
 		}
@@ -201,10 +218,35 @@ class SongDetail extends Component {
 			          titleColor="#fff"
 			        />
 			        <View style={styles.cdWrapper}>
-			        	<Image
-						  style={styles.cd}
-						  source={{uri: this.props.albumPic}}
-						/>
+			        	<Animated.View style={
+			        		{
+			        			width:0.705*width,
+			        			height: 0.705*width,
+			        			borderRadius: 0.705*width,
+			        			justifyContent: 'center',
+			        			alignItems: 'center',
+			        			backgroundColor: 'rgba(255,255,255,0.3)',
+			        	  		transform: [
+			        	  			{
+			        	  				rotateZ: this.state.rotationDeg.interpolate({
+			        	  					inputRange: [0, 360],
+			        	  					outputRange: ['0deg', '360deg']
+			        	  				})
+			        	  			}
+			        	  		]
+			        	  	}
+			        	}>
+			        	<ImageBackground 
+			        	  source={require('../static/disk.png')}
+			        	  style={styles.disk}>
+			        		<View style={{elevation: 2}}>
+				        		<Image
+								  style={styles.cd}
+								  source={{uri: this.props.albumPic}}
+								/>
+			        		</View>
+			        	</ImageBackground>
+			        	</Animated.View>
 			        </View>
 			        <View style={styles.bottomButtons}>
 			        	<View style={{justifyContent: 'center'}}>
@@ -357,9 +399,15 @@ const styles = StyleSheet.create({
 	cd: {
 		// borderWidth: 5,
 		// borderColor: 'rgba(0, 0, 0, 0.75)',
-		width: 0.5*width,
-		height: 0.5*width,
-		borderRadius: 0.5*width
+		width: 0.45*width,
+		height: 0.45*width,
+		borderRadius: 0.5*width,
+	},
+	disk: {
+		width: 0.7*width,
+		height: 0.7*width,
+		justifyContent: 'center',
+		alignItems: 'center'
 	},
 	cdWrapper: {
 		borderTopWidth: 1,

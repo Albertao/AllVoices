@@ -5,8 +5,8 @@
     android:background="#fff">
     <ImageView
         android:id="@+id/albumPic"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:src="@mipmap/cd"
@@ -14,27 +14,27 @@
         />
     <RelativeLayout
         android:layout_width = "match_parent"
-        android:layout_height="120dp"
+        android:layout_height="100dp"
         android:layout_toEndOf="@id/albumPic"
         android:layout_toRightOf="@id/albumPic"
         android:background="#fff">
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="120dp">
+            android:layout_height="100dp">
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="70dp">
+                android:layout_height="60dp">
                 <LinearLayout
                     android:paddingStart="20dp"
                     android:paddingEnd="20dp"
                     android:paddingLeft="20dp"
                     android:paddingRight="20dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
                     android:layout_width="0dp"
                     android:orientation="vertical"
-                    android:layout_height="70dp"
+                    android:layout_height="60dp"
                     android:layout_weight="6">
                     <TextView
                         android:maxLines="1"
@@ -74,30 +74,30 @@
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="50dp">
+                android:layout_height="40dp">
                 <ImageButton
                     android:id="@+id/btn_prev"
-                    android:layout_height="50dp"
+                    android:layout_height="40dp"
                     android:layout_width="60dp"
-                    android:layout_weight="2"
-                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:layout_gravity="right"
                     android:src="@mipmap/ic_skip_previous_black_24dp"
                     android:background="?android:attr/selectableItemBackground"/>
                 <ImageButton
                     android:id="@+id/btn_play_or_pause"
-                    android:layout_height="50dp"
+                    android:layout_height="40dp"
                     android:layout_gravity="center_vertical"
                     android:background="?android:attr/selectableItemBackground"
-                    android:layout_width="60dp"
+                    android:layout_width="40dp"
                     android:layout_weight="1"
                     android:src="@mipmap/ic_pause_circle_outline_black_24dp" />
                 <ImageButton
                     android:id="@+id/btn_next"
-                    android:layout_height="50dp"
+                    android:layout_height="40dp"
                     android:layout_gravity="center_vertical"
                     android:background="?android:attr/selectableItemBackground"
                     android:layout_width="60dp"
-                    android:layout_weight="2"
+                    android:layout_weight="1"
                     android:src="@mipmap/ic_skip_next_black_24dp" />
             </LinearLayout>
         </LinearLayout>

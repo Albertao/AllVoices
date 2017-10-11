@@ -12,6 +12,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import getNeteaseSongDetail from "../actions/neDetail"
 import Player from '../components/player'
 import * as stypes from '../utils/storage/StorageTypes'
+import * as types from '../actions/ActionTypes'
 
 const Dimensions = require('Dimensions')
 
@@ -92,10 +93,11 @@ class Search extends Component {
 				id: 1,
 				data: ret
 			})
+			song.info = info
+			var obj = {ids: [item.id], br: 12800, csrf_token: ''}
+			this.props.dispatch(getNeteaseSongDetail(neEnc(obj), song))
 		})
-		item.info = info
-		var obj = {ids: [item.id], br: 12800, csrf_token: ''}
-		this.props.dispatch(getNeteaseSongDetail(neEnc(obj), item))
+		
 	}
 
 	getXmSongUrl = (item) => {
@@ -119,6 +121,7 @@ class Search extends Component {
 			song.song_url = item.listen_file
 			console.log(song)
 			NativeModules.MusicService.play(song)
+			this.props.dispatch({'type': types.SET_XM_PLAYER_DETAIL, data: song})
 		})
 	}
 

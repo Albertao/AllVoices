@@ -138,6 +138,7 @@ public class MusicService extends Service implements
             }
             rv.setTextViewText(R.id.song_name, song_list.getString("song_name"));
             rv.setTextViewText(R.id.song_info, song_list.getString("artist_name"));
+            rv.setImageViewResource(R.id.btn_play_or_pause, R.mipmap.ic_pause_circle_outline_black_24dp);
             String song_url = song_list.getString("song_url");
             context.runOnUiQueueThread(new Runnable() {
                 @Override
@@ -174,7 +175,8 @@ public class MusicService extends Service implements
     public void pause() {
         if(this.player.isPlaying()) {
             if(rv != null) {
-                rv.setImageViewResource(R.id.btn_play_or_pause, R.mipmap.ic_pause_circle_outline_black_24dp);
+                rv.setImageViewResource(R.id.btn_play_or_pause, R.mipmap.ic_play_circle_outline_black_24dp);
+                notifyManager.notify(NOTIFY_ME_ID, notification);
             }
             this.player.pause();
         }
@@ -183,7 +185,8 @@ public class MusicService extends Service implements
     public void resume() {
         if(!this.player.isPlaying()) {
             if(rv != null) {
-                rv.setImageViewResource(R.id.btn_play_or_pause, R.mipmap.ic_play_circle_outline_black_24dp);
+                rv.setImageViewResource(R.id.btn_play_or_pause, R.mipmap.ic_pause_circle_outline_black_24dp);
+                notifyManager.notify(NOTIFY_ME_ID, notification);
             }
             this.player.start();
         }
@@ -229,7 +232,6 @@ public class MusicService extends Service implements
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.i("info", "service binded233");
         return binder;
     }
 
@@ -272,13 +274,6 @@ public class MusicService extends Service implements
         notifyManager.notify(NOTIFY_ME_ID, notification);
     }
 
-//    public void setNotificationDetail(ReadableMap params) {
-//        if(rv != null ) {
-//            rv.setTextViewText(R.id.song_name, "test");
-//            Picasso.with(context).load("http://img0.imgtn.bdimg.com/it/u=3842120192,849756080&fm=27&gp=0.jpg").placeholder(R.mipmap.cd).into(rv, R.id.btn_streaming_notification_play, NOTIFY_ME_ID, notification);
-//        }
-//    }
-
     public void clearNotification() {
         if (notifyManager != null)
             notifyManager.cancel(NOTIFY_ME_ID);
@@ -292,13 +287,15 @@ public class MusicService extends Service implements
         notifyManager = null;
     }
 
-//    public void setRemoteViewButton(boolean isPlaying) {
-//        if (isPlaying) {
-//            rv.setImageViewResource(R.id.btn_play_or_pause, R.mipmap.ic_pause_circle_outline_black_24dp);
-//        }else {
-//            rv.setImageViewResource(R.id.btn_play_or_pause, R.mipmap.ic_play_circle_outline_black_24dp);
-//        }
-//    }
+    public void setRemoteViewButton(boolean playing) {
+        if (playing) {
+            rv.setImageViewResource(R.id.btn_play_or_pause, R.mipmap.ic_pause_circle_outline_black_24dp);
+            notifyManager.notify(NOTIFY_ME_ID, notification);
+        }else {
+            rv.setImageViewResource(R.id.btn_play_or_pause, R.mipmap.ic_play_circle_outline_black_24dp);
+            notifyManager.notify(NOTIFY_ME_ID, notification);
+        }
+    }
 
     private PendingIntent makePendingIntent(String broadcast) {
         Intent intent = new Intent(broadcast);

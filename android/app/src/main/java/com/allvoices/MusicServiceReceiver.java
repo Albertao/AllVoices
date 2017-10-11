@@ -29,6 +29,7 @@ class MusicServiceReceiver extends BroadcastReceiver {
                 if(serviceInstance.player != null) {
                     WritableMap params = Arguments.createMap();
                     params.putBoolean("status", true);
+                    serviceInstance.setRemoteViewButton(serviceInstance.player.isPlaying());
                     if(serviceInstance.player.isPlaying()) {
                         serviceInstance.sendEvent("playerPause", params);
                         serviceInstance.pause();
