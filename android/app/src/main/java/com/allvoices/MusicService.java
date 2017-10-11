@@ -244,7 +244,7 @@ public class MusicService extends Service implements
     public void showNotification() {
         rv = new RemoteViews(context.getPackageName(), R.layout.sample_notify_view);
         notifyBuilder = new NotificationCompat.Builder(this.context)
-                .setSmallIcon(android.R.drawable.ic_lock_idle_lock) // TODO Use app icon instead
+                .setSmallIcon(R.mipmap.notify_logo)
                 .setContentText("")
                 .setOngoing(true)
                 .setContent(rv);
