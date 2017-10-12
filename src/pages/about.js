@@ -1,11 +1,24 @@
 import React, {Component} from 'react'
 import ParallaxScrollView from 'react-native-parallax-scroll-view'
-import {Platform, TouchableNativeFeedback, ToastAndroid, Linking, BackHandler, Image, Text, View, StatusBar} from 'react-native'
+import {Alert, Platform, TouchableNativeFeedback, ToastAndroid, Linking, BackHandler, Image, Text, View, StatusBar} from 'react-native'
 import {NavigationActions} from 'react-navigation'
-import {Header, Avatar, List, ListItem} from 'react-native-elements'
+import {Button, Header, Avatar, List, ListItem} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/MaterialIcons'
-import {checkUpdate} from 'react-native-update'
+import {
+  isFirstTime,
+  isRolledBack,
+  packageVersion,
+  currentVersion,
+  checkUpdate,
+  downloadUpdate,
+  switchVersion,
+  switchVersionLater,
+  markSuccess,
+} from 'react-native-update';
+import Spinner from 'react-native-spinkit'
 import _updateConfig from '../../update.json';
+import Modal from 'react-native-modalbox'
+
 const {appKey} = _updateConfig[Platform.OS];
 
 const mailAddress = 'me@alberthao.cc'
@@ -14,19 +27,56 @@ const Dimensions = require('Dimensions')
 
 const {width, height} = Dimensions.get('window')
 
-const AboutList = [
+export default class AboutAllVoices extends Component {
+
+	constructor(props) {
+		super(props)
+		this.state = {
+			downloading: false,
+			newVersionInfo: {
+				name: '加载中',
+				description: '……'
+			}
+		}
+	}
+
+	doUpdate = () => {
+		ToastAndroid.show('下载中……请稍候', ToastAndroid.SHORT)
+		this.setState({downloading: true})
+		downloadUpdate(this.state.newVersionInfo).then(hash => {
+			this.setState({downloading: false})
+			Alert.alert('提示', '下载完毕,是否重启应用?', [
+		        {text: '是', onPress: ()=>{switchVersion(hash);}},
+		        {text: '否',},
+		        {text: '下次启动时', onPress: ()=>{switchVersionLater(hash);}},
+		    ]);
+		}).catch((err) => {
+			this.setState({downloading: false})
+			ToastAndroid.show('下载失败，请稍后再试', ToastAndroid.SHORT)
+		})
+	}
+
+	AboutList = [
 	  {
 	    name: '检查更新',
 	    icon: 'update',
 	    subtitle: 'Vice President',
 	    onPress: () => {
+	    	ToastAndroid.show('正在检查更新中……请稍候', ToastAndroid.SHORT)
 	    	checkUpdate(appKey).then((info) => {
 	    		if(info.expired) {
 	    			ToastAndroid.show('您当前应用已经过期了，请前往应用市场下载最新版本~', ToastAndroid.SHORT)
 	    		}
-	    		if(info.upToDate) {
+	    		else if(info.upToDate) {
 	    			ToastAndroid.show('当前已经是最新版本了，无需更新~', ToastAndroid.SHORT)
+	    		}else {
+	    			this.setState({
+	    				newVersionInfo: info
+	    			})
+	    			this.refs.updateModal.open()
 	    		}
+	    	}).catch(err => {
+	    		ToastAndroid.show('网络链接失败，请稍后再试', ToastAndroid.SHORT)
 	    	})
 	    }
 	  },
@@ -48,8 +98,6 @@ const AboutList = [
 	  }
 	]
 
-export default class AboutAllVoices extends Component {
-
 	componentDidMount() {
 		BackHandler.addEventListener('hardwareBackPress', this.onBackPress)
 	}
@@ -61,6 +109,38 @@ export default class AboutAllVoices extends Component {
 	onBackPress = () => {
 		this.props.navigation.goBack()
 		return true
+	}
+
+	renderUpdateModal() {
+		return (
+			<Modal
+			  coverScreen={true}
+			  style={{height: 300, justifyContent: 'center', alignItems: 'center'}}
+			  position={"center"}
+			  backButtonClose={true}
+			  swipeArea={300}
+			  ref={"updateModal"}>
+			  	<View style={{width: 0.7*width}}>
+				  	<Text style={{color: 'rgba(0, 0, 0, 0.87)'}}>版本号：{this.state.newVersionInfo.name}</Text>
+					<Text style={{color: 'rgba(0, 0, 0, 0.54)'}}>更新内容： </Text>
+		  			<Text>{this.state.newVersionInfo.description}</Text>
+			  	</View>
+				<View style={{flexDirection: 'row', marginTop: 20}}>
+				<Button
+				  raised
+				  onPress={this.doUpdate}
+				  icon={{name: 'done'}}
+				  backgroundColor='#2096f3'
+				  disabled={this.state.downloading}
+				  title='确定' />
+				<Button
+				  raised
+				  onPress={() => this.refs.updateModal.close()}
+				  icon={{name: 'close'}}
+				  title='取消' />
+				</View>
+			</Modal>
+		)
 	}
 
 	render() {
@@ -115,7 +195,7 @@ export default class AboutAllVoices extends Component {
 				<View>
 					<List containerStyle={{marginTop: 20, height: 0.53*height}}>
 					  {
-					    AboutList.map((l, i) => (
+					    this.AboutList.map((l, i) => (
 					      <TouchableNativeFeedback key={i} onPress={l.onPress}>
 						      <ListItem
 						        leftIcon={{name:l.icon}}
@@ -132,6 +212,7 @@ export default class AboutAllVoices extends Component {
 						<Text style={{fontSize: 18, color: 'rgba(0, 0, 0, 0.54)'}}>Looking For Job, Meow~</Text>
 					</View>
 				</View>
+				{this.renderUpdateModal()}
 			</ParallaxScrollView>
 		)
 	}
