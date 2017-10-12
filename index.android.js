@@ -8,6 +8,7 @@ import './src/utils/storage/init'
 import onCompletionEventListener from './src/utils/storage/onCompletionListener'
 import {playSong} from './src/utils/playSong'
 import SplashScreen from 'react-native-splash-screen'
+import {isFirstTime, markSuccess} from 'react-native-update'
 
 const store = configureStore();
 
@@ -24,6 +25,9 @@ if (!__DEV__) {
 export default class App extends Component {
 
   componentDidMount = () => {
+    if(isFirstTime) {
+      markSuccess()
+    }
     SplashScreen.hide()
   	DeviceEventEmitter.addListener('completed', (e) => onCompletionEventListener(e, store.dispatch))
   }

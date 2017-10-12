@@ -15,7 +15,6 @@ import {
   switchVersionLater,
   markSuccess,
 } from 'react-native-update';
-import Spinner from 'react-native-spinkit'
 import _updateConfig from '../../update.json';
 import Modal from 'react-native-modalbox'
 
