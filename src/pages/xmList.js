@@ -1,10 +1,10 @@
 import React, {Component} from 'react'
-import {ActivityIndicator, BackHandler, FlatList, ToastAndroid, NativeModules, StyleSheet, Text, TextInput, View, StatusBar, Image, TouchableNativeFeedback, ScrollView} from 'react-native'
+import {ImageBackground, ActivityIndicator, BackHandler, FlatList, ToastAndroid, NativeModules, StyleSheet, Text, TextInput, View, StatusBar, Image, TouchableNativeFeedback, ScrollView} from 'react-native'
 import getXiamiListDetail from '../actions/xmList'
 import {connect} from 'react-redux'
 import {NavigationActions} from 'react-navigation'
 import {List, ListItem} from 'react-native-elements'
-import { Icon, Tile, Button } from 'react-native-elements'
+import { Icon, Button } from 'react-native-elements'
 import Modal from 'react-native-modalbox'
 import xmEnc from '../utils/xmEnc'
 import Player from '../components/player'
@@ -105,8 +105,14 @@ class XiamiList extends Component {
 
 	renderDone() {
 		return (
-			<View style={{height: height-310}}>
+			<View style={{height: height-60}}>
 			<FlatList
+			  ListHeaderComponent={
+			  	<View style={{backgroundColor: 'rgba(0, 0, 0, 0.33)'}}>
+					<View style={{height: StatusBar.currentHeight}}></View>
+				 	   {this.renderCard()}
+				</View>
+			  }
 			  ListFooterComponent={this.renderFooter}
 			  keyExtractor={this._key_extractor}
 			  data={this.props.song_list}
@@ -129,9 +135,12 @@ class XiamiList extends Component {
 		return (
 			<TouchableNativeFeedback onPress={() => this.playSong(item, index)}>
 			  <ListItem
+			  	containerStyle={{backgroundColor: 'rgba(255,255,255,0.2)'}}
 			    roundAvatar
 			    avatar={{uri:item.album_pic}}
-			    rightIcon={{name: 'add'}}
+			    titleStyle={{color: 'rgba(0,0,0,0.87)'}}
+			    subtitleStyle={{color: 'rgba(0, 0, 0, 0.54)'}}
+			    rightIcon={{name: 'add', color: 'rgba(0, 0, 0, 0.6)'}}
 			    onPressRightIcon={() => {
 					this.setState({selectedSong: item})
 					this.refs.modal.open()
@@ -145,7 +154,11 @@ class XiamiList extends Component {
 
 	renderLoading() {
 		return (
-			<View style={{height:height-310}}>
+			<View style={{backgroundColor: 'rgba(255,255,255,0.2)', height:height-60}}>
+				<View style={{backgroundColor: 'rgba(0, 0, 0, 0.33)'}}>
+					<View style={{height: StatusBar.currentHeight}}></View>
+				    {this.renderCard()}
+				</View>
 				<View style={{padding: 20, flexDirection: 'row', justifyContent: 'center'}}>
 				  <ActivityIndicator size="small" color="#fa8723" />
 		          <Text style={{textAlign: 'center', fontSize: 15, color: 'rgba(0, 0, 0, 0.54)'}}>
@@ -158,7 +171,7 @@ class XiamiList extends Component {
 
 	renderFail() {
 		return (
-			<View style={{height:height-310}}>
+			<View style={{height:height-60}}>
 			<TouchableNativeFeedback
 				onPress={() => {
 					let id = this.props.navigation.state.params.id
@@ -179,13 +192,69 @@ class XiamiList extends Component {
 		let params = this.props.navigation.state.params
 		return (
 			<View>
-				<Tile
-				   imageSrc={{uri: params.curl}}
-				   title={params.name}
-				   onPress={this.showModal}
-				   featured
-				   caption={"Author: " + params.creator}
-				/>
+			<View style={{
+				width: width,
+				height: 0.2*height,
+				backgroundColor: 'rgba(0, 0, 0, 0.3)',
+				justifyContent: 'center',
+				alignItems: 'center'
+			}}>
+				<Text numberOfLines={1} style={{
+					textAlign: 'center',
+					width: 0.6*width,
+					marginBottom: 10,
+					color: 'white',
+					fontSize: 25
+				}}>{params.name}</Text>
+				<View style={{
+					borderWidth: 1,
+					borderColor: 'white',
+					padding: 5,
+					borderRadius: 5
+				}}>
+					<Text style={{color: 'white'}}>{'Author: ' + params.creator}</Text>
+				</View>
+			</View>
+			<View style={{
+				width: width,
+				height: 0.1*height,
+				backgroundColor: 'rgba(0, 0, 0, 0.3)',
+				flexDirection: 'row',
+				alignItems: 'center',
+				justifyContent: 'center'
+			}}>
+				<TouchableNativeFeedback onPress={this.showModal}>
+					<View style={{
+					  	flex: 1,
+					  	width: 0.5*width,
+					  	height: 0.1*height,
+					  	justifyContent: 'center',
+					  	alignItems: 'center'
+					}}>
+						<Icon name="star" color="#fff" />
+						<Text style={{color: '#fff'}}>收藏歌单</Text>
+					</View>
+				</TouchableNativeFeedback>
+				<TouchableNativeFeedback 
+				  onPress={() => {
+				  	if(this.props.status != 'done') {
+				  		ToastAndroid.show('歌单正在加载中', ToastAndroid.SHORT)
+				  	}else {
+				  		this.playSong(this.props.song_list[0], 0)
+				  	}
+				  }}>
+				  	<View style={{
+				  		flex: 1,
+					  	width: 0.5*width,
+					  	height: 0.1*height,
+					  	justifyContent: 'center',
+					  	alignItems: 'center'
+				  	}}>
+				  		<Icon name="play-arrow" color="#fff" />
+						<Text style={{color: '#fff'}}>播放歌单</Text>
+					</View>
+				</TouchableNativeFeedback>
+			</View>
 			</View>
 		)
 	}
@@ -212,6 +281,7 @@ class XiamiList extends Component {
 						type: stypes.SONG_LIST_LOOP
 					}
 				}).then((ret) => {
+					ToastAndroid.show('收藏成功！', ToastAndroid.SHORT)
 					this.refs.collectModal.close()
 				})
 			})
@@ -224,18 +294,20 @@ class XiamiList extends Component {
 		return (
 			<View style={styles.layout}>
 		      	<StatusBar backgroundColor='rgba(0, 0, 0, 0.3)' translucent={true} />
-		      	<View style={styles.card}>
-					{this.renderCard()}
-		      	</View>
-		      	<View>
-		      		{this.renderTracks()}
-		      	</View>
-		      	<Player
-		      	  navigation={this.props.navigation}
-		      	  bgColor="#fff"
-		      	  btnColor="#000"
-		      	  songNameColor="rgba(0, 0, 0, 0.87)"
-		      	  artistColor="rgba(0, 0, 0, 0.54)" />
+		      	<ImageBackground 
+		      	  source={{uri:this.props.navigation.state.params.curl}}
+		      	  style={{width: width, height: height}}
+		      	  blurRadius={5} >
+			      	<View>
+			      		{this.renderTracks()}
+			      	</View>
+			      	<Player
+			      	  navigation={this.props.navigation}
+			      	  bgColor="rgba(255,255,255,0.6)"
+			      	  btnColor="#000"
+			      	  songNameColor="rgba(0, 0, 0, 0.87)"
+			      	  artistColor="rgba(0, 0, 0, 0.54)" />
+		      	</ImageBackground>
 		      	{this.renderModal()}  
 		      	{this.renderCollectModal()}
 		    </View>
@@ -294,7 +366,6 @@ class XiamiList extends Component {
 				        		key: 'songList',
 				        		id: l.id
 				        	}).then((ret) => {
-				        		console.log(this.state.selectedSong)
 				        		ret.songs.push(this.state.selectedSong)
 				        		storage.save({
 				        			key: 'songList',

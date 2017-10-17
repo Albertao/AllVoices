@@ -371,7 +371,16 @@ class SongDetail extends Component {
 			  swipeToClose={false}
 			  swipeArea={(height-60)/2}>
 		      {this.state.song_list.length == 0 ?
-		      	(<Text>尚未有任何歌曲</Text>) : 
+		      	(<View style={{
+		      		justifyContent: 'center',
+		      		alignItems: 'center',
+		      		backgroundColor: 'rgba(0, 0, 0, 0.3)',
+			      	height: 50,
+		      	}}>
+			      	<Text style={{
+			      		color: 'rgba(255,255,255,0.87)',
+			      	}}>尚未有任何歌曲，快去曲库中添加吧！</Text>
+		      	</View>) : 
 		      	(<FlatList
 		      	style={{flex: 1, height: 300}}
 		     	ref={"sl"}

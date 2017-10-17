@@ -98,29 +98,38 @@ class Player extends React.Component {
 					<View><Text numberOfLines={1} style={{fontSize: 14, color: this.props.artistColor}}>{this.props.artiseName}</Text></View>
 				</View>
 				<View style={{flexDirection: 'row', alignItems: 'center', flex: 3}}>
+					<TouchableNativeFeedback
+					  background={TouchableNativeFeedback.SelectableBackgroundBorderless()}
+					  onPress={this.prevSong}>
 					<Icon
 						size={35}
 						name='navigate-before'
-						color={this.props.btnColor}
-						onPress={this.prevSong} />
+						color={this.props.btnColor} />
+					</TouchableNativeFeedback>
+					<TouchableNativeFeedback 
+					  background={TouchableNativeFeedback.SelectableBackgroundBorderless()}
+					  onPress={() => {
+						if(this.props.playing) {
+							NativeModules.MusicService.pause()
+							this.props.dispatch({'type':types.SET_PLAYER_PAUSE})
+						}else {
+							NativeModules.MusicService.resume()
+							this.props.dispatch({'type':types.SET_PLAYER_RESUME})
+						}
+					}} >
 					<Icon
 						size={30}
 						name={this.props.playing ? 'pause-circle-outline' : 'play-circle-outline'}
-						color={this.props.btnColor}
-						onPress={() => {
-							if(this.props.playing) {
-								NativeModules.MusicService.pause()
-								this.props.dispatch({'type':types.SET_PLAYER_PAUSE})
-							}else {
-								NativeModules.MusicService.resume()
-								this.props.dispatch({'type':types.SET_PLAYER_RESUME})
-							}
-						}} />
+						color={this.props.btnColor} />
+					</TouchableNativeFeedback>
+					<TouchableNativeFeedback 
+					  background={TouchableNativeFeedback.SelectableBackgroundBorderless()}
+					  onPress={this.nextSong}>
 					<Icon
 						size={35}
 						name='navigate-next'
-						color={this.props.btnColor}
-						onPress={this.nextSong} />
+						color={this.props.btnColor} />
+					</TouchableNativeFeedback>
 				</View>
 			</View>
 			</TouchableNativeFeedback>

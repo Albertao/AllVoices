@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {ActivityIndicator, BackHandler, FlatList, ToastAndroid, StyleSheet, Text, TextInput, View, StatusBar, Image, TouchableNativeFeedback, ScrollView} from 'react-native'
+import {ImageBackground, ActivityIndicator, BackHandler, FlatList, ToastAndroid, StyleSheet, Text, TextInput, View, StatusBar, Image, TouchableNativeFeedback, ScrollView} from 'react-native'
 import getNeteaseListDetail from '../actions/neList'
 import getNeteaseSongDetail from '../actions/neDetail'
 import {connect} from 'react-redux'
@@ -109,8 +109,14 @@ class NetEaseList extends Component {
 
 	renderDone() {
 		return (
-			<View style={{height: height-310}}>
+			<View style={{height: height-60}}>
 			<FlatList
+			  ListHeaderComponent={
+			  	<View style={{backgroundColor: 'rgba(0, 0, 0, 0.33)'}}>
+					<View style={{height: StatusBar.currentHeight}}></View>
+				 	   {this.renderCard()}
+				</View>
+			  }
 			  ListFooterComponent={this.renderFooter}
 			  keyExtractor={this._key_extractor}
 			  data={this.props.song_list}
@@ -161,7 +167,11 @@ class NetEaseList extends Component {
 
 	renderLoading() {
 		return (
-			<View style={{height:height-310}}>
+			<View style={{height:height-60}}>
+				<View style={{backgroundColor: 'rgba(0, 0, 0, 0.33)'}}>
+					<View style={{height: StatusBar.currentHeight}}></View>
+				    {this.renderCard()}
+				</View>
 				<View style={{padding: 20, flexDirection: 'row', justifyContent: 'center'}}>
 				  <ActivityIndicator size="small" color="#fa8723" />
 		          <Text style={{textAlign: 'center', fontSize: 15, color: 'rgba(0, 0, 0, 0.54)'}}>
@@ -174,7 +184,7 @@ class NetEaseList extends Component {
 
 	renderFail() {
 		return (
-			<View style={{height:height-310}}>
+			<View style={{height:height-60}}>
 			<TouchableNativeFeedback
 				onPress={() => {
 					let id = this.props.navigation.state.params.id
@@ -195,13 +205,69 @@ class NetEaseList extends Component {
 		let params = this.props.navigation.state.params
 		return (
 			<View>
-				<Tile
-				   imageSrc={{uri: params.curl}}
-				   title={params.name}
-				   onPress={this.showCollectModal}
-				   featured
-				   caption={"Author: " + params.creator}
-				/>
+			<View style={{
+				width: width,
+				height: 0.2*height,
+				backgroundColor: 'rgba(0, 0, 0, 0.3)',
+				justifyContent: 'center',
+				alignItems: 'center'
+			}}>
+				<Text numberOfLines={1} style={{
+					textAlign: 'center',
+					width: 0.6*width,
+					marginBottom: 10,
+					color: 'white',
+					fontSize: 25
+				}}>{params.name}</Text>
+				<View style={{
+					borderWidth: 1,
+					borderColor: 'white',
+					padding: 5,
+					borderRadius: 5
+				}}>
+					<Text style={{color: 'white'}}>{'Author: ' + params.creator}</Text>
+				</View>
+			</View>
+			<View style={{
+				width: width,
+				height: 0.1*height,
+				backgroundColor: 'rgba(0, 0, 0, 0.3)',
+				flexDirection: 'row',
+				alignItems: 'center',
+				justifyContent: 'center'
+			}}>
+				<TouchableNativeFeedback onPress={this.showCollectModal}>
+					<View style={{
+					  	flex: 1,
+					  	width: 0.5*width,
+					  	height: 0.1*height,
+					  	justifyContent: 'center',
+					  	alignItems: 'center'
+					}}>
+						<Icon name="star" color="#fff" />
+						<Text style={{color: '#fff'}}>收藏歌单</Text>
+					</View>
+				</TouchableNativeFeedback>
+				<TouchableNativeFeedback 
+				  onPress={() => {
+				  	if(this.props.status != 'done') {
+				  		ToastAndroid.show('歌单正在加载中', ToastAndroid.SHORT)
+				  	}else {
+				  		this.getSongUrl(this.props.song_list[0], 0)
+				  	}
+				  }}>
+				  	<View style={{
+				  		flex: 1,
+					  	width: 0.5*width,
+					  	height: 0.1*height,
+					  	justifyContent: 'center',
+					  	alignItems: 'center'
+				  	}}>
+				  		<Icon name="play-arrow" color="#fff" />
+						<Text style={{color: '#fff'}}>播放歌单</Text>
+					</View>
+				</TouchableNativeFeedback>
+			</View>
 			</View>
 		)
 	}
@@ -317,20 +383,22 @@ class NetEaseList extends Component {
 		return (
 			<View style={styles.layout}>
 		      	<StatusBar backgroundColor='rgba(0, 0, 0, 0.3)' translucent={true} />
+		      	<ImageBackground 
+		      	  source={{uri:this.props.navigation.state.params.curl}}
+		      	  style={{width: width, height: height}}
+		      	  blurRadius={5} >
+			      	<View>
+			      		{this.renderTracks()}
+			      	</View>
+			      	<Player
+			      	  navigation={this.props.navigation}
+			      	  bgColor="rgba(255,255,255,0.6)"
+			      	  btnColor="#000"
+			      	  songNameColor="rgba(0, 0, 0, 0.87)"
+			      	  artistColor="rgba(0, 0, 0, 0.54)" />
+		      	</ImageBackground>
 		      	{this.renderModal()}  
 		      	{this.renderCollectModal()}
-		      	<View style={styles.card}>
-					{this.renderCard()}
-		      	</View>
-		      	<View>
-		      		{this.renderTracks()}
-		      	</View>
-		      	<Player
-		      	  navigation={this.props.navigation}
-		      	  bgColor="#fff"
-		      	  btnColor="#000"
-		      	  songNameColor="rgba(0, 0, 0, 0.87)"
-		      	  artistColor="rgba(0, 0, 0, 0.54)" />
 		    </View>
 		)
 	}
