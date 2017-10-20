@@ -13,7 +13,6 @@ export default function getXiamiListDetail(id) {
 					}
 				}).then((res) => {
 					let json = JSON.parse(res._bodyText)
-					console.log(json)
 					dispatch({'type': types.XIAMI_SONG_LIST_DETAIL_DONE, 'data': json.data})
 				}).catch((err) => {
 					console.log(err)

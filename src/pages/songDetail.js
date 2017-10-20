@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {Easing, Animated, BackHandler, ScrollView, FlatList, DeviceEventEmitter, NativeModules, ProgressBar, TouchableNativeFeedback, StyleSheet, ToastAndroid, StatusBar, ImageBackground, Image, View, Text} from 'react-native'
+import {Clipboard, Easing, Animated, BackHandler, ScrollView, FlatList, DeviceEventEmitter, NativeModules, ProgressBar, TouchableNativeFeedback, StyleSheet, ToastAndroid, StatusBar, ImageBackground, Image, View, Text} from 'react-native'
 import {connect} from 'react-redux'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import {ListItem, Button, Slider} from 'react-native-elements'
@@ -8,6 +8,7 @@ import * as types from '../actions/ActionTypes'
 import * as stypes from '../utils/storage/StorageTypes'
 import {playSong, playSourceSong} from '../utils/playSong'
 import Modal from 'react-native-modalbox'
+import * as WeChat from 'react-native-wechat';
 
 const Dimensions = require('Dimensions')
 
@@ -141,6 +142,58 @@ class SongDetail extends Component {
 		}
 	}
 
+	copyUrl = () => {
+		var songUrl = this.props.songUrl
+		Clipboard.setString(songUrl)
+		ToastAndroid.show('已将歌曲链接复制到剪贴板', ToastAndroid.SHORT)
+	}
+
+	shareMusicToTimeline = () => {
+		if(this.props.status != 'done') {
+			ToastAndroid.show('歌曲信息加载中……', ToastAndroid.SHORT)
+		}
+		WeChat.isWXAppInstalled().then((isInstalled) => {
+			if(isInstalled) {				
+				WeChat.shareToTimeline({
+					title: this.props.songName,
+					description: this.props.artiseName,
+					thumbImage: this.props.albumPic,
+					type:'audio',
+					musicUrl:this.props.songUrl
+				}).then((e) => {
+					console.log(e)
+				}).catch((error) => {
+					ToastAndroid.show(error.message, ToastAndroid.SHORT)
+				})
+			}else {
+				ToastAndroid.show('该手机尚未安装微信，请前往应用市场下载！', ToastAndroid.SHORT)
+			}
+		})
+	}
+
+	shareMusic = () => {
+		// if(this.props.status != 'done') {
+		// 	ToastAndroid.show('歌曲信息加载中……', ToastAndroid.SHORT)
+		// }
+		// WeChat.isWXAppInstalled().then((isInstalled) => {
+		// 	if(isInstalled) {
+		// 		WeChat.shareToSession({
+		// 			title: this.props.songName,
+		// 			description: this.props.artiseName,
+		// 			thumbImage: this.props.albumPic,
+		// 			type:'audio',
+		// 			musicUrl: this.props.songUrl,
+		// 			webpageUrl:'http://baidu.com/'
+		// 		}).then((errCode) => {
+					
+		// 		})
+		// 	}else {
+		// 		ToastAndroid.show('该手机尚未安装微信，请前往应用市场下载！', ToastAndroid.SHORT)
+		// 	}
+		// })
+		ToastAndroid.show('由于微信原因，该功能暂不可用', ToastAndroid.SHORT)
+	}
+
 	changeMode = () => {
 		storage.load({
 			key: 'activeSongList',
@@ -214,7 +267,7 @@ class SongDetail extends Component {
 			              {iconSize: 25, iconName: 'share', title: '分享', show: 'always'}
 			            ]
 			          }
-			          onActionSelected={() => ToastAndroid.show('该功能将在下个版本中加入~', ToastAndroid.SHORT)}
+			          onActionSelected={() => {this.refs.shareModal.open()}}
 			          titleColor="#fff"
 			        />
 			        <View style={styles.cdWrapper}>
@@ -308,6 +361,7 @@ class SongDetail extends Component {
 			        </View>
 			    </View>
 				</ImageBackground>
+				{this.renderShareModal()}
 				{this.renderModal()}
 			</View>
 		)
@@ -361,6 +415,47 @@ class SongDetail extends Component {
 		return item.song_id
 	}
 
+	renderShareModal() {
+		return (
+			<Modal
+			  style={{height: 0.4*height, backgroundColor: '#fff'}}
+			  position={"bottom"}
+			  ref={"shareModal"}
+			  backButtonClose={true}
+			  swipeToClose={true}
+			  swipeArea={(height-60)/2}>
+				<View style={{height: 0.2*height, padding: 20}}>
+					<Text style={{color: 'rgba(0,0,0,0.87)'}}>复制</Text>
+					<ScrollView style={{height: 0.15*height, paddingTop: 5}} horizontal={true}>
+						<TouchableNativeFeedback onPress={this.copyUrl}>
+						<View style={{alignItems: 'center', marginRight: 20}}>
+							<Image style={{marginBottom: 5, width: 0.07*height, height: 0.07*height}} source={require('../static/link39.png')} />
+							<Text style={{textAlign: 'center', color: 'rgba(0,0,0,0.54)'}}>复制链接</Text>
+						</View>
+						</TouchableNativeFeedback>
+					</ScrollView>
+				</View>
+				<View style={{height: 0.2*height, padding: 20}}>
+					<Text style={{color: 'rgba(0,0,0,0.87)'}}>分享到</Text>
+					<ScrollView style={{height: 0.15*height, paddingTop: 5}} horizontal={true}>
+						<TouchableNativeFeedback onPress={this.shareMusicToTimeline}>
+						<View style={{alignItems: 'center', marginRight: 20}}>
+							<Image style={{marginBottom: 5, width: 0.07*height, height: 0.07*height}} source={require('../static/timeline.png')} />
+							<Text style={{textAlign: 'center', color: 'rgba(0,0,0,0.54)'}}>朋友圈</Text>
+						</View>
+						</TouchableNativeFeedback>
+						<TouchableNativeFeedback onPress={this.shareMusic}>
+						<View style={{alignItems: 'center', marginRight: 10}}>
+							<Image style={{marginBottom: 5, width: 0.07*height, height: 0.07*height}} source={require('../static/wechat.png')} />
+							<Text style={{textAlign: 'center', color: 'rgba(0,0,0,0.54)'}}>微信好友</Text>
+						</View>
+						</TouchableNativeFeedback>
+					</ScrollView>
+				</View>
+			</Modal>
+		)
+	}
+
 	renderModal() {
 		return (
 			<Modal 
@@ -397,6 +492,7 @@ class SongDetail extends Component {
 function select(store) {
 	return {
 		songName: store.getPlayerDetail.songName,
+		songUrl: store.getPlayerDetail.songUrl,
 		artiseName: store.getPlayerDetail.artiseName,
 		albumPic: store.getPlayerDetail.albumPic,
 		playing: store.getPlayerDetail.playing,

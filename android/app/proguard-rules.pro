@@ -62,6 +62,12 @@
 -keep interface okhttp3.** { *; }
 -dontwarn okhttp3.**
 
+# wechat sdk
+
+-keep class com.tencent.mm.sdk.** {
+  *;
+}
+
 # okio
 
 -keep class sun.misc.Unsafe { *; }

@@ -5,6 +5,7 @@ const initialState = {
 	artiseName: ' ',
 	status: 'init', // init, done, false, pause, resume
 	albumPic: 'http://www.easyicon.net/api/resizeApi.php?id=1188681&size=128',
+	songUrl: '',
 	playing: false
 }
 
@@ -16,6 +17,7 @@ export default function getPlayerDetail(state=initialState, action) {
 					songName: action.data.song_name,
 					artiseName: action.data.artist_name,
 					albumPic: action.data.album_pic,
+					songUrl: action.data.song_url,
 					playing: true,
 					status: 'done'
 				}
@@ -24,6 +26,7 @@ export default function getPlayerDetail(state=initialState, action) {
 					songName: action.data.song_name,
 					artiseName: action.data.artist_name,
 					albumPic: action.data.album_pic,
+					songUrl: action.data.song_url,
 					playing: action.playing,
 					status: 'done'
 				}
@@ -35,6 +38,7 @@ export default function getPlayerDetail(state=initialState, action) {
 					songName: action.data.song_name,
 					albumPic:action.data.album_pic,
 					artiseName:action.data.artist_name,
+					songUrl: action.data.song_url,
 					playing: action.playing,
 					status: 'done'
 				}
@@ -43,6 +47,7 @@ export default function getPlayerDetail(state=initialState, action) {
 					songName: action.data.song_name,
 					albumPic:action.data.album_logo,
 					artiseName:action.data.artist_name,
+					songUrl: action.data.song_url,
 					playing: true,
 					status: 'done'
 				}

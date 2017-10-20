@@ -19,6 +19,7 @@ export default function getNeteaseSongDetail(obj, item) {
 			}
 			NativeModules.MusicService.play(obj)
 			if(json.code == 200) {
+				json.result.song_url = json.data[0].url
 				dispatch({'type': types.NETEASE_SONG_DETAIL_DONE, 'data': json.result})
 			}else {
 				dispatch({'type': types.NETEASE_SONG_DETAIL_FAIL})

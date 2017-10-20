@@ -12,6 +12,7 @@ import com.facebook.soloader.SoLoader;
 import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import cn.reactnative.modules.update.UpdatePackage;
 import cn.reactnative.modules.update.UpdateContext;
+import com.theweflex.react.WeChatPackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +37,8 @@ public class MainApplication extends Application implements ReactApplication {
             new VectorIconsPackage(),
             new AllVoicesMusicServicePackage(),
             new SplashScreenReactPackage(),
-            new UpdatePackage()
+            new UpdatePackage(),
+            new WeChatPackage()
       );
     }
 
